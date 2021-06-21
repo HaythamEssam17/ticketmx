@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_boc.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_events.dart';
 import 'package:ticketmx_app/Classes/dateClass.dart';
 import 'package:ticketmx_app/Classes/itemClass.dart';
-import 'package:ticketmx_app/Classes/ticketClass.dart';
 import 'package:ticketmx_app/Helpers/sharedText.dart';
 import 'package:ticketmx_app/Helpers/textStyles.dart';
 import 'package:ticketmx_app/Widgets/ItemWidgets/textSelectorPage.dart';
@@ -18,8 +20,6 @@ class DateWidget extends StatefulWidget {
 }
 
 class _DateWidgetState extends State<DateWidget> {
-  TicketClass ticketClass = TicketClass(1, true, '', '', '', '', '', '', 0.0);
-
   int selectedDateIndex = 1;
 
   void selectDateTextIndex(int index) {
@@ -32,6 +32,12 @@ class _DateWidgetState extends State<DateWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<TicketBloc>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return customListTile(() {
       CommonAlertDialogWidget.showAlertDialog(
@@ -40,27 +46,30 @@ class _DateWidgetState extends State<DateWidget> {
         subtitle: 'All Dates',
         children: dateChildren(),
       );
-    }, 'Date', SharedText.selectedDate);
+    }, 'Date', context.watch<TicketBloc>().getDate);
   }
 
   Widget customListTile(Function() onTap, String title, String subtitle) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: TextStyles.blackBoldTextStyle()),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(subtitle, style: TextStyles.blackBoldTextStyle()),
-                Icon(FontAwesome.sort_down, color: Colors.grey),
-              ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: SharedText.screenHeight * 0.01),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: TextStyles.blackBoldTextStyle()),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(subtitle, style: TextStyles.blackBoldTextStyle()),
+                  Icon(FontAwesome.sort_down, color: Colors.grey),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -72,9 +81,9 @@ class _DateWidgetState extends State<DateWidget> {
       (index) => TextSelectorWidget(
           onTap: () {
             setState(() {
+              BlocProvider.of<TicketBloc>(context)
+                  .add(DateSelectEvent(DateClass.dateList[index].date));
               selectDateTextIndex(index);
-              SharedText.selectedDate = DateClass.dateList[index].date;
-              ticketClass.date = SharedText.selectedDate;
               Navigator.pop(context);
             });
           },

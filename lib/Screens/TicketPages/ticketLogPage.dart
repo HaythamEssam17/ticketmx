@@ -37,7 +37,7 @@ class _TicketLogPageState extends State<TicketLogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBarWidget(title: 'Ticket Log', isWithLeading: true),
-      drawer: CommonDrawerWidget(),
+      endDrawer: CommonDrawerWidget(),
       body: Container(
         child: Card(
           margin: CommonPaddingWidget.padding(),
@@ -75,6 +75,7 @@ class _TicketLogPageState extends State<TicketLogPage> {
             : CommonTextFormFieldWidget.customTextFormField(
                 controller: searchController,
                 hintText: 'Enter ticket code',
+                isToBorder: false,
                 onChanged: (value) {
                   setState(() {});
                 }),
@@ -89,8 +90,8 @@ class _TicketLogPageState extends State<TicketLogPage> {
                     .toList();
                 print('not empty: ${ticketDetailsList.length}');
               } else {
-                ticketDetailsList = TicketLogDetailsClass.ticketLogDetailsList;
-                print('empty: ${ticketDetailsList.length}');
+                // ticketDetailsList = TicketLogDetailsClass.ticketLogDetailsList;
+                // print('empty: ${ticketDetailsList.length}');
               }
             });
           },

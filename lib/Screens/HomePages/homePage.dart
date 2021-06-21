@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBarWidget(title: 'Home', isWithLeading: false),
-      drawer: CommonDrawerWidget(),
+      endDrawer: CommonDrawerWidget(),
       body: Container(
         height: SharedText.screenHeight,
         width: SharedText.screenWidth,

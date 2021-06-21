@@ -48,7 +48,8 @@ class CommonAppBarWidget extends StatelessWidget
       actions: [
         IconButton(
             onPressed: () {
-              Scaffold.of(context).openDrawer();
+              // Scaffold.of(context).openDrawer();
+              Scaffold.of(context).openEndDrawer();
             },
             icon: Icon(LineariconsFree.menu,
                 color: Colors.white,

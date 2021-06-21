@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_boc.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_events.dart';
 import 'package:ticketmx_app/Classes/categoryClass.dart';
 import 'package:ticketmx_app/Classes/itemClass.dart';
-import 'package:ticketmx_app/Classes/ticketClass.dart';
 import 'package:ticketmx_app/Helpers/sharedText.dart';
 import 'package:ticketmx_app/Helpers/textStyles.dart';
 import 'package:ticketmx_app/Widgets/ItemWidgets/textSelectorPage.dart';
@@ -18,8 +20,6 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
-  TicketClass ticketClass = TicketClass(1, true, '', '', '', '', '', '', 0.0);
-
   int selectedCatIndex = 0;
 
   void selectedCatTextIndex(int index) {
@@ -32,6 +32,12 @@ class _CategoryWidgetState extends State<CategoryWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<TicketBloc>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return customListTile(() {
       CommonAlertDialogWidget.showAlertDialog(
@@ -40,27 +46,30 @@ class _CategoryWidgetState extends State<CategoryWidget> {
         subtitle: 'All Categories',
         children: categoryChildren(),
       );
-    }, 'Category', SharedText.selectedCategory);
+    }, 'Category', context.watch<TicketBloc>().getCategory);
   }
 
   Widget customListTile(Function() onTap, String title, String subtitle) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: TextStyles.blackBoldTextStyle()),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(subtitle, style: TextStyles.blackBoldTextStyle()),
-                Icon(FontAwesome.sort_down, color: Colors.grey),
-              ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: SharedText.screenHeight * 0.01),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: TextStyles.blackBoldTextStyle()),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(subtitle, style: TextStyles.blackBoldTextStyle()),
+                  Icon(FontAwesome.sort_down, color: Colors.grey),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -72,10 +81,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
       (index) => TextSelectorWidget(
           onTap: () {
             setState(() {
+              BlocProvider.of<TicketBloc>(context).add(
+                  CategorySelectEvent(CategoryClass.categoryList[index].name));
               selectedCatTextIndex(index);
-              SharedText.selectedCategory =
-                  CategoryClass.categoryList[index].name;
-              ticketClass.category = SharedText.selectedCategory;
               Navigator.pop(context);
             });
           },

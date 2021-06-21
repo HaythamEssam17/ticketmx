@@ -12,11 +12,9 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController controller;
   late Animation<double> scaleAnimation;
 
-  void goToNextPage(BuildContext context) async {
-    Future.delayed(
-        Duration(milliseconds: 2000),
-        () => Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => SignInPage())));
+  void goToNextPage(BuildContext context) {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => SignInPage()));
   }
 
   @override
@@ -31,13 +29,11 @@ class _SplashScreenState extends State<SplashScreen>
       setState(() {});
     });
 
-    controller.forward();
+    controller.forward().whenComplete(() => goToNextPage(context));
   }
 
   @override
   Widget build(BuildContext context) {
-    goToNextPage(context);
-
     return Scaffold(
       body: Container(
         height: SharedText.screenHeight,

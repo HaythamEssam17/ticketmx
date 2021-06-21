@@ -11,21 +11,25 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  GlobalKey<FormState> _formStateKey = GlobalKey<FormState>();
   late TextEditingController emailController = TextEditingController();
   late TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: SharedText.screenHeight,
-        width: SharedText.screenWidth,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('images/bg.png'), fit: BoxFit.fill),
-        ),
-        child: Center(
-          child: signInWidget(),
+      body: Form(
+        key: _formStateKey,
+        child: Container(
+          height: SharedText.screenHeight,
+          width: SharedText.screenWidth,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage('images/bg.png'), fit: BoxFit.fill),
+          ),
+          child: Center(
+            child: signInWidget(),
+          ),
         ),
       ),
     );
@@ -51,14 +55,27 @@ class _SignInPageState extends State<SignInPage> {
             ),
             SizedBox(height: SharedText.screenHeight * 0.025),
             CommonTextFormFieldWidget.customTextFormField(
-                controller: emailController, hintText: 'Email Address'),
+                controller: emailController,
+                hintText: 'Email Address',
+                validator: (value) {
+                  if (value!.isEmpty) return 'Value can\'t be null';
+                }),
             SizedBox(height: SharedText.screenHeight * 0.025),
             CommonTextFormFieldWidget.customTextFormField(
-                controller: passwordController, hintText: 'Password'),
+                controller: passwordController,
+                hintText: 'Password',
+                validator: (value) {
+                  if (value!.isEmpty) return 'Value can\'t be null';
+                }),
             SizedBox(height: SharedText.screenHeight * 0.025),
             CommonButtons.customButton(
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage())),
+                onPressed: () {
+                  if (_formStateKey.currentState!.validate()) {
+                    _formStateKey.currentState!.save();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  }
+                },
                 text: 'Login',
                 iconData: null,
                 bgColor: SharedText.secondColor),

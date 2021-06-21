@@ -1,15 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
 import 'package:fluttericon/linearicons_free_icons.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_boc.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_states.dart';
 import 'package:ticketmx_app/Classes/itemClass.dart';
 import 'package:ticketmx_app/Classes/ticketClass.dart';
 import 'package:ticketmx_app/Helpers/sharedText.dart';
 import 'package:ticketmx_app/Helpers/textStyles.dart';
-import 'package:ticketmx_app/Screens/TicketPages/categoryCard.dart';
-import 'package:ticketmx_app/Screens/TicketPages/dateCard.dart';
+import 'package:ticketmx_app/Screens/TicketPages/SelectorsCards/categoryCard.dart';
+import 'package:ticketmx_app/Screens/TicketPages/SelectorsCards/dateCard.dart';
+import 'package:ticketmx_app/Screens/TicketPages/SelectorsCards/timeCard.dart';
 import 'package:ticketmx_app/Screens/TicketPages/ticketHomePage.dart';
-import 'package:ticketmx_app/Screens/TicketPages/timeCard.dart';
 import 'package:ticketmx_app/Widgets/commonAppBarWidget.dart';
 import 'package:ticketmx_app/Widgets/commonButtons.dart';
 import 'package:ticketmx_app/Widgets/commonDrawerWidget.dart';
@@ -27,6 +30,9 @@ class ItemDetailsPage extends StatefulWidget {
 
 class _ItemDetailsPageState extends State<ItemDetailsPage> {
   TicketClass ticketClass = TicketClass(1, true, '', '', '', '', '', '', 0.0);
+  String date = '';
+  String time = '';
+  String category = '';
 
   int generateCode() {
     int code = 0;
@@ -39,18 +45,19 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
   }
 
   void onButtonPressed() {
-    if (SharedText.selectedDate.isNotEmpty &&
-        SharedText.selectedTime.isNotEmpty &&
-        SharedText.selectedCategory.isNotEmpty) {
+    if (date != '' && time != '' && category != '') {
       ticketClass.isAccepted = false;
-      ticketClass.id = 1;
-      ticketClass.code = generateCode().toString();
-      ticketClass.title =
-          ticketClass.isAccepted ? 'Ticket Accepted' : 'Ticket Rejected';
-      ticketClass.price = 0.0;
       ticketClass.image = ticketClass.isAccepted
           ? 'images/truemark.png'
           : 'images/falsemark.png';
+      ticketClass.title =
+          ticketClass.isAccepted ? 'Ticket Accepted' : 'Ticket Rejected';
+      ticketClass.id = 1;
+      ticketClass.code = generateCode().toString();
+      ticketClass.price = 0.0;
+      ticketClass.date = date;
+      ticketClass.time = time;
+      ticketClass.category = category;
 
       Navigator.push(
           context,
@@ -65,16 +72,21 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
   @override
   void initState() {
     super.initState();
-    SharedText.selectedCategory = '';
-    SharedText.selectedDate = '';
-    SharedText.selectedTime = '';
+
+    BlocProvider.of<TicketBloc>(context).selectedDate = '';
+    BlocProvider.of<TicketBloc>(context).selectedTime = '';
+    BlocProvider.of<TicketBloc>(context).selectedCategory = '';
   }
 
   @override
   Widget build(BuildContext context) {
+    date = context.watch<TicketBloc>().getDate;
+    time = context.watch<TicketBloc>().getTime;
+    category = context.watch<TicketBloc>().getCategory;
+
     return Scaffold(
       appBar: CommonAppBarWidget(title: widget.item.name, isWithLeading: true),
-      drawer: CommonDrawerWidget(),
+      endDrawer: CommonDrawerWidget(),
       body: Container(
         height: SharedText.screenHeight,
         width: SharedText.screenWidth,
@@ -94,7 +106,9 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                 title: Text(widget.item.name,
                     textAlign: TextAlign.center,
                     style: TextStyles.buttonBoldTextStyle()),
-                background: Image.asset(widget.item.image, fit: BoxFit.fill),
+                background: Hero(
+                    tag: '${widget.item.image}_ABC',
+                    child: Image.asset(widget.item.image, fit: BoxFit.fill)),
               ),
             ),
             SliverPadding(
@@ -119,33 +133,44 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                 color: Colors.white,
                 child: Column(
                   children: [
+                    // Date Widget
                     DateWidget(item: widget.item),
                     Divider(color: Colors.grey),
+
+                    // Time Widget
                     TimeWidget(item: widget.item),
                     Divider(color: Colors.grey),
+
+                    // Category Widget
                     CategoryWidget(item: widget.item),
                     Divider(color: Colors.grey),
-                    if (SharedText.selectedDate.isNotEmpty &&
-                        SharedText.selectedTime.isNotEmpty &&
-                        SharedText.selectedCategory.isNotEmpty)
-                      Column(
-                        children: [
-                          customAttendsAndSubWidget(
-                              widget.item.attendsExpectedNo,
-                              widget.item.subscriberExpectedNo),
-                          Divider(color: Colors.grey),
-                        ],
-                      ),
-                    SizedBox(height: SharedText.screenHeight * 0.025),
+
+                    // Attends-SubWidget
+                    BlocBuilder<TicketBloc, TicketStates>(
+                      builder: (context, state) {
+                        if (date != '' && time != '' && category != '') {
+                          return Column(
+                            children: [
+                              customAttendsAndSubWidget(
+                                  widget.item.attendsExpectedNo,
+                                  widget.item.subscriberExpectedNo),
+                              Divider(color: Colors.grey),
+                              SizedBox(height: SharedText.screenHeight * 0.025),
+                            ],
+                          );
+                        }
+                        return Text('');
+                      },
+                    ),
+
+                    // Scan Button
                     CommonButtons.customButton(
                         onPressed: () {
                           onButtonPressed();
                         },
                         text: 'Scan Ticket',
                         iconData: LineariconsFree.frame_expand,
-                        bgColor: SharedText.selectedDate.isNotEmpty &&
-                                SharedText.selectedTime.isNotEmpty &&
-                                SharedText.selectedCategory.isNotEmpty
+                        bgColor: date != '' && time != '' && category != ''
                             ? SharedText.mainColor
                             : SharedText.secondColor),
                     SizedBox(height: SharedText.screenHeight * 0.05),

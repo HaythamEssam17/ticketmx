@@ -15,10 +15,13 @@ class CommonItemCard {
       color: Colors.white,
       child: Column(
         children: [
-          Image.asset(item.image,
-              height: SharedText.screenHeight * 0.5,
-              width: SharedText.screenWidth,
-              fit: BoxFit.fill),
+          Hero(
+            tag: '${item.image}_ABC',
+            child: Image.asset(item.image,
+                height: SharedText.screenHeight * 0.5,
+                width: SharedText.screenWidth,
+                fit: BoxFit.fill),
+          ),
           SizedBox(height: SharedText.screenHeight * 0.025),
           Container(
             padding: CommonPaddingWidget.padding(),

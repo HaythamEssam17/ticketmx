@@ -26,7 +26,7 @@ class _TicketHomePageState extends State<TicketHomePage> {
     return Scaffold(
       appBar: CommonAppBarWidget(
           title: widget.ticketClass.title, isWithLeading: true),
-      drawer: CommonDrawerWidget(),
+      endDrawer: CommonDrawerWidget(),
       body: Card(
         margin: CommonPaddingWidget.padding(),
         child: Container(

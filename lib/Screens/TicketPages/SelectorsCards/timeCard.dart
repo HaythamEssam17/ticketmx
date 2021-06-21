@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_boc.dart';
+import 'package:ticketmx_app/Bloc/Ticket_Bloc/ticket_events.dart';
 import 'package:ticketmx_app/Classes/itemClass.dart';
-import 'package:ticketmx_app/Classes/ticketClass.dart';
 import 'package:ticketmx_app/Classes/timeClass.dart';
 import 'package:ticketmx_app/Helpers/sharedText.dart';
 import 'package:ticketmx_app/Helpers/textStyles.dart';
@@ -18,8 +20,6 @@ class TimeWidget extends StatefulWidget {
 }
 
 class _TimeWidgetState extends State<TimeWidget> {
-  TicketClass ticketClass = TicketClass(1, true, '', '', '', '', '', '', 0.0);
-
   int selectedTimeIndex = 1;
 
   void selectTimeTextIndex(int index) {
@@ -32,6 +32,12 @@ class _TimeWidgetState extends State<TimeWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<TicketBloc>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return customListTile(() {
       CommonAlertDialogWidget.showAlertDialog(
@@ -40,27 +46,30 @@ class _TimeWidgetState extends State<TimeWidget> {
         subtitle: 'All times',
         children: timeChildren(),
       );
-    }, 'Time', SharedText.selectedTime);
+    }, 'Time', context.watch<TicketBloc>().getTime);
   }
 
   Widget customListTile(Function() onTap, String title, String subtitle) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: TextStyles.blackBoldTextStyle()),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(subtitle, style: TextStyles.blackBoldTextStyle()),
-                Icon(FontAwesome.sort_down, color: Colors.grey),
-              ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: SharedText.screenHeight * 0.01),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: TextStyles.blackBoldTextStyle()),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(subtitle, style: TextStyles.blackBoldTextStyle()),
+                  Icon(FontAwesome.sort_down, color: Colors.grey),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -69,12 +78,12 @@ class _TimeWidgetState extends State<TimeWidget> {
       TimeClass.timeList
           .where((element) => element.itemID == widget.item.id)
           .length,
-          (index) => TextSelectorWidget(
+      (index) => TextSelectorWidget(
           onTap: () {
             setState(() {
+              BlocProvider.of<TicketBloc>(context)
+                  .add(TimeSelectEvent(TimeClass.timeList[index].time));
               selectTimeTextIndex(index);
-              SharedText.selectedTime = TimeClass.timeList[index].time;
-              ticketClass.time = SharedText.selectedTime;
               Navigator.pop(context);
             });
           },
